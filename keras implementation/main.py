@@ -94,5 +94,3 @@ plt.title('Training and Validation loss')
 plt.legend()
 
 plt.savefig('loss.png')
-
-plt.savefig('loss.png')
