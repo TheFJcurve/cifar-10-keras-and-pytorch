@@ -1,11 +1,13 @@
 """Using keras to tackle the CIFAR 10 dataset, using VGG16 convolutional network, dropouts and data
 augmentation. The output model and the graphs are saved in the same folder."""
 
+import tensorflow as tf
 from keras import layers
 from keras import models
 from keras.applications import VGG16
 from keras.preprocessing.image import ImageDataGenerator
 from keras.datasets import cifar10
+from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 
 
@@ -14,12 +16,14 @@ import matplotlib.pyplot as plt
 train_set = train_set / 255.0
 test_set = test_set / 255.0
 
-train_labels = train_labels.flatten()
-test_labels = test_labels.flatten()
+train_labels = to_categorical(train_labels, num_classes=10)
+test_labels = to_categorical(test_labels, num_classes=10)
 
 NUM_BATCH_SIZE = 32
-NUM_EPOCHS = 100 ## Change this at will. The default value is 100.
-NUM_STEPS_PER_EPOCH = train_set.shape[0] // NUM_BATCH_SIZE 
+NUM_EPOCHS = 20 ## Change this at will. The default value is 100.
+NUM_STEPS_PER_EPOCH =  train_set.shape[0] // NUM_BATCH_SIZE 
+LEARNING_RATE = 0.002
+MOMENTUM = 0.9
 
 conv_base = VGG16(weights="imagenet",
                     include_top=False,
@@ -29,6 +33,8 @@ conv_base = VGG16(weights="imagenet",
 model = models.Sequential()
 model.add(conv_base)
 model.add(layers.Flatten())
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dropout(0.5))
 model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dropout(0.5))
@@ -58,8 +64,13 @@ train_generator = train_datagen.flow(train_set,
                                     train_labels,
                                     batch_size=NUM_BATCH_SIZE)
 
-model.compile(loss='sparse_categorical_crossentropy',
-                optimizer='SGD',                
+opt = tf.keras.optimizers.SGD(
+    learning_rate=LEARNING_RATE,
+    momentum=MOMENTUM,
+    name="SGD")
+
+model.compile(loss='categorical_crossentropy',
+                optimizer=opt,                
                 metrics=['acc'])
 
 
@@ -85,7 +96,7 @@ plt.plot(epochs, val_acc, 'b', label='Validation acc')
 plt.title('Training and Validation acc')
 plt.legend()
 
-plt.savefig('accuracy.png')
+plt.savefig('accuracy-keras.png')
 
 plt.clf()
 plt.plot(epochs, loss, 'bo', label='Training loss')
@@ -93,4 +104,4 @@ plt.plot(epochs, val_loss, 'b', label='Validation loss')
 plt.title('Training and Validation loss')
 plt.legend()
 
-plt.savefig('loss.png')
+plt.savefig('loss-keras.png')
