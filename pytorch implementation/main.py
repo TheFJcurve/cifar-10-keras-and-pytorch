@@ -205,6 +205,7 @@ def process_cifar():
     torch.save(model.state_dict(), 'cifar-10-model-pytorch.h5')
 
     accuracy_plot()
+    plt.clf()
     loss_plot()
 
 

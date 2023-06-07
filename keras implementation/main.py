@@ -1,5 +1,5 @@
-"""Using keras to tackle the CIFAR 10 dataset, using VGG16 convolutional network, dropouts and data augmentation.
-The output model and the graphs are saved in the same folder."""
+"""Using keras to tackle the CIFAR 10 dataset, using VGG16 convolutional network, dropouts and data
+augmentation. The output model and the graphs are saved in the same folder."""
 
 from keras import layers
 from keras import models
@@ -22,16 +22,17 @@ NUM_EPOCHS = 100 ## Change this at will. The default value is 100.
 NUM_STEPS_PER_EPOCH = train_set.shape[0] // NUM_BATCH_SIZE 
 
 conv_base = VGG16(weights="imagenet",
-                  include_top=False,
-                  input_shape=(32, 32 ,3))
+                    include_top=False,
+                    input_shape=(32, 32 ,3))
 
 
 model = models.Sequential()
 model.add(conv_base)
 model.add(layers.Flatten())
 model.add(layers.Dropout(0.5))
-model.add(layers.Dense(1024, activation='relu'))
-model.add(layers.Dropout(0.2))
+model.add(layers.Dense(512, activation='relu'))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dense(10, activation='sigmoid'))
 
 
@@ -47,19 +48,19 @@ for layer in conv_base.layers:
 
 
 train_datagen = ImageDataGenerator(rotation_range=40,
-                                   width_shift_range=0.2,
-                                   height_shift_range=0.2,
-                                   shear_range=0.2,
-                                   zoom_range=0.2,
-                                   horizontal_flip=True)
+                                    width_shift_range=0.2,
+                                    height_shift_range=0.2,
+                                    shear_range=0.2,
+                                    zoom_range=0.2,
+                                    horizontal_flip=True)
 
 train_generator = train_datagen.flow(train_set,
-                                     train_labels,
-                                     batch_size=NUM_BATCH_SIZE)
+                                    train_labels,
+                                    batch_size=NUM_BATCH_SIZE)
 
 model.compile(loss='sparse_categorical_crossentropy',
-              optimizer='adam',
-              metrics=['acc'])
+                optimizer='SGD',                
+                metrics=['acc'])
 
 
 history = model.fit(train_generator,
@@ -86,6 +87,7 @@ plt.legend()
 
 plt.savefig('accuracy.png')
 
+plt.clf()
 plt.plot(epochs, loss, 'bo', label='Training loss')
 plt.plot(epochs, val_loss, 'b', label='Validation loss')
 plt.title('Training and Validation loss')
