@@ -1,0 +1,2 @@
+
+plt.savefig('loss.png')
